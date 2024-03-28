@@ -1,0 +1,10 @@
+[workspace]
+
+resolver = "2"
+members = [ "simulator-lib","simulator-wasm"]
+
+[profile.release]
+# Tell `rustc` to optimize for small code size.
+opt-level = "s"
+# build with debug so that debug symbols are produced
+debug = true
