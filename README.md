@@ -1,5 +1,29 @@
 # Ergosim :: game :: simulator
 
+## Dependencies
+
+### Production 
+
+#### [Rand](https://crates.io/crates/rand)
+
+Enables random number generation and associated functionality, e.g. sampling a normal distribution over a 
+range of numbers.
+
+#### [Rust Decimal](https://crates.io/crates/rust_decimal)
+
+Enables the use of fixed precision decimal numbers in Rust, which is useful to represent results of financial
+calculations.
+
+### Development
+
+#### [QuickCheck](https://crates.io/crates/quickcheck)
+
+Property based testing for Rust.
+
+#### [QuickCheck Macros](https://crates.io/crates/quickcheck_macros)
+
+Some utility macros for the quickcheck crate.
+
 ## Managing the project
 
 ### Building
