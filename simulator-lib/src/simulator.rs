@@ -36,7 +36,7 @@ impl Simulator {
         self.listeners.push(Box::new(listener));
     }
 
-    pub fn tick(&mut self) -> Result<Decimal, SimulatorError> {
+    fn tick(&mut self) -> Result<Decimal, SimulatorError> {
         if self.listeners.is_empty() {
             return Err(SimulatorError::NoListenersRegistered);
         }
@@ -44,13 +44,21 @@ impl Simulator {
         for listener in &self.listeners {
             match listener.next_input()? {
                 SimulatorInput::GrowthRate(growth_rate) => {
-                    self.current_capital = self.current_capital * growth_rate;
+                    self.current_capital = (self.current_capital * growth_rate).round_dp(2);
                     self.capital_evolution.push(self.current_capital);
                 }
             }
         }
 
         return Ok(self.current_capital);
+    }
+
+    pub fn run(mut self, ticks: usize) -> Result<Vec<Decimal>, SimulatorError> {
+        for _ in 0..ticks {
+            self.tick()?;
+        }
+
+        Ok(self.capital_evolution)
     }
 }
 
@@ -74,6 +82,7 @@ impl SimulatorListener for RandomGrowthRate {
 
 #[cfg(test)]
 mod tests {
+    use rust_decimal::prelude::ToPrimitive;
     use crate::decimal::IntoDecimalVec;
     use super::*;
 
@@ -107,5 +116,19 @@ mod tests {
         assert_eq!(&simulator.capital_evolution[0], &100.0.into_decimal());
         assert!(vec![Decimal::new(110, 0), 90.0.into_decimal()].contains(&simulator.capital_evolution[1]));
         assert!(vec![Decimal::new(110, 0), 90.0.into_decimal()].contains(&simulator.current_capital));
+    }
+
+    #[test]
+    fn test_simulator_run(){
+        let possible_growth_rates: Vec<Decimal> = vec![0.9, 1.1].into_decimal_vec();
+        let mut simulator = Simulator::new(100.0);
+        simulator.add_listener(RandomGrowthRate {
+            distribution: possible_growth_rates.clone()
+        });
+
+        let result = simulator.run(10).expect("Running should work");
+        let last = result.last().clone();
+
+        assert_eq!(result.len(), 11);
     }
 }
